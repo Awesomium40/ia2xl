@@ -29,6 +29,7 @@ def _append_validation_sheet_(workbook: openpyxl.workbook.Workbook, property: ia
         # also, need to lock it so that the user can't change the values
         # not totally secure, but good enough for our purposes
         new_sheet = workbook.create_sheet(sheet_name)
+        new_sheet.append(["property_value", "property_description", "property_value_id", "property_id"])
 
         # All data is stored as strings, but can be interpreted as either strings or numeric, depending on the
         # data_type attribute. Data needs to be stored in the appropriate format for validation purposes
@@ -38,7 +39,7 @@ def _append_validation_sheet_(workbook: openpyxl.workbook.Workbook, property: ia
         # Once the sheet has been appended, add the PropertyValue.value and PropertyValue.description to the sheet
         # for reference and validation
         for pv in property:  # type: ia.iaconfiguration._PropertyValue
-            new_sheet.append((data_type(pv.value), pv.description))
+            new_sheet.append((data_type(pv.value), pv.description, pv.property_value_id, pv.property_id))
 
         # Don't want users to mess with the validation values, so let's lock the worksheet
         # not really secure, as can be edited outside of excel, but for this purpose, it's good enough
@@ -55,7 +56,7 @@ def _set_global_validation_(data_sheet: openpyxl.workbook.workbook.Worksheet, ro
 
     validation_title = vsheet.title
     dv = DataValidation(type="list",
-                        formula1=f"{quote_sheetname(validation_title)}!$A$1:$A${vsheet.max_row}",
+                        formula1=f"{quote_sheetname(validation_title)}!$A$2:$A${vsheet.max_row}",
                         allow_blank=True
                         )
     dv.add(f"B{row_number}")
@@ -77,7 +78,7 @@ def _set_validation_(data_sheet: openpyxl.workbook.workbook.Worksheet, idx: str,
     # This DataValidation object specifies that a list rule is to be used,
     # drawing its values from column A of vsheet, and allowing null values
     dv = DataValidation(type="list",
-                        formula1=f"{quote_sheetname(validation_title)}!$A$1:$A${vsheet.max_row}",
+                        formula1=f"{quote_sheetname(validation_title)}!$A$2:$A${vsheet.max_row}",
                         allow_blank=True
                        )
 
